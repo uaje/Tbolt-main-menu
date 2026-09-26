@@ -2,16 +2,16 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>ThunderboltT1003's website</title>
+<title>MyWiki – Windows XP Edition</title>
 
 <style>
   body {
     margin: 0;
     font-family: Tahoma, Verdana, sans-serif;
-    background: #3a6ea5; /* XP blue */
+    background: #3a6ea5;
+    color: black;
   }
 
-  /* XP window frame */
   #xp-window {
     width: 90%;
     margin: 20px auto;
@@ -20,7 +20,6 @@
     box-shadow: 0 0 10px rgba(0,0,0,0.4);
   }
 
-  /* XP title bar */
   #title-bar {
     background: linear-gradient(#245edc, #1a4aa5);
     color: white;
@@ -29,52 +28,24 @@
     font-weight: bold;
   }
 
-  /* Layout wrapper */
   #content-wrapper {
     display: flex;
   }
 
-  /* Sidebar */
   #sidebar {
     width: 200px;
-    background: #ece9d8; /* XP beige */
+    background: #ece9d8;
     border-right: 1px solid #b5b2a8;
     padding: 10px;
     font-size: 14px;
   }
 
-  #sidebar h3 {
-    margin-top: 0;
-    font-size: 15px;
-  }
-
-  #sidebar a {
-    color: #0645ad;
-    text-decoration: none;
-  }
-
-  #sidebar a:hover {
-    text-decoration: underline;
-  }
-
-  /* Article */
   #article {
     flex: 1;
     padding: 20px;
     background: #ffffff;
   }
 
-  #article h1 {
-    margin-top: 0;
-  }
-
-  #article h2 {
-    border-bottom: 1px solid #a2a9b1;
-    padding-bottom: 3px;
-    margin-top: 20px;
-  }
-
-  /* Footer */
   #footer {
     padding: 10px;
     font-size: 12px;
@@ -82,19 +53,44 @@
     background: #ece9d8;
     border-top: 1px solid #b5b2a8;
   }
+
+  /* Rejected message */
+  #rejected {
+    width: 60%;
+    margin: 60px auto;
+    background: #ffffff;
+    border: 2px solid #8b0000;
+    box-shadow: 0 0 10px rgba(0,0,0,0.4);
+    padding: 20px;
+    text-align: center;
+    font-size: 16px;
+  }
 </style>
+
+<script>
+  // Change this to the URL you require
+  const allowedReferrer = "https://example.com/start";
+
+  window.addEventListener("DOMContentLoaded", function () {
+    const ref = document.referrer;
+
+    // If referrer doesn't match, show rejection and hide main window
+    if (!ref || !ref.startsWith(allowedReferrer)) {
+      document.getElementById("xp-window").style.display = "none";
+      document.getElementById("rejected").style.display = "block";
+    }
+  });
+</script>
 </head>
 
 <body>
 
 <div id="xp-window">
-
   <div id="title-bar">
     MyWiki – Windows XP Edition
   </div>
 
   <div id="content-wrapper">
-
     <div id="sidebar">
       <h3>Navigation</h3>
       <ul>
@@ -103,45 +99,24 @@
         <li><a href="#">Random article</a></li>
         <li><a href="#">About</a></li>
       </ul>
-
-      <h3>Tools</h3>
-      <ul>
-        <li><a href="#">What links here</a></li>
-        <li><a href="#">Printable version</a></li>
-      </ul>
     </div>
 
     <div id="article">
       <h1>Example Article Title</h1>
       <p><i>From MyWiki, the free encyclopedia</i></p>
-
-      <p>This is an example of a Windows XP–styled Wikipedia article layout.</p>
-
-      <h2>History</h2>
-      <p>Place your history section content here.</p>
-
-      <h2>Features</h2>
-      <p>Describe features or details here.</p>
-
-      <h2>See also</h2>
-      <ul>
-        <li><a href="#">Related topic 1</a></li>
-        <li><a href="#">Related topic 2</a></li>
-      </ul>
-
-      <h2>References</h2>
-      <ol>
-        <li>Reference 1</li>
-        <li>Reference 2</li>
-      </ol>
+      <p>You successfully came from the allowed URL, so you can see this page.</p>
     </div>
-
   </div>
 
   <div id="footer">
     Content is available under a Creative Commons license unless otherwise noted.
   </div>
+</div>
 
+<div id="rejected" style="display:none;">
+  <h2>Access Denied</h2>
+  <p>This page can only be accessed from a specific website.</p>
+  <p>Please return to the main site and follow the proper link.</p>
 </div>
 
 </body>
