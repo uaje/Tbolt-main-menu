@@ -12,12 +12,36 @@
     color: black;
   }
 
+  /* Login Box */
+  #auth-box {
+    width: 300px;
+    margin: 40px auto;
+    background: #ffffff;
+    padding: 20px;
+    border: 2px solid #1e4c8b;
+    box-shadow: 0 0 10px rgba(0,0,0,0.4);
+    text-align: center;
+  }
+
+  #auth-box input {
+    width: 90%;
+    padding: 8px;
+    margin: 6px 0;
+  }
+
+  #auth-box button {
+    padding: 8px 12px;
+    margin-top: 10px;
+  }
+
+  /* XP Window */
   #xp-window {
     width: 90%;
     margin: 20px auto;
     background: #ffffff;
     border: 2px solid #1e4c8b;
     box-shadow: 0 0 10px rgba(0,0,0,0.4);
+    display: none; /* Hidden until login */
   }
 
   #title-bar {
@@ -53,16 +77,34 @@
     background: #ece9d8;
     border-top: 1px solid #b5b2a8;
   }
-
-  #rejected {
-    display: none; /* no longer used */
-  }
 </style>
 
 </head>
 
 <body>
 
+<!-- LOGIN BOX -->
+<div id="auth-box">
+  <h2>Login / Sign Up</h2>
+
+  <div id="signup">
+    <h3>Create Account</h3>
+    <input id="newUser" type="text" placeholder="Username">
+    <input id="newPass" type="password" placeholder="Password">
+    <button onclick="signup()">Sign Up</button>
+  </div>
+
+  <div id="login">
+    <h3>Login</h3>
+    <input id="user" type="text" placeholder="Username">
+    <input id="pass" type="password" placeholder="Password">
+    <button onclick="login()">Login</button>
+  </div>
+
+  <p id="auth-msg"></p>
+</div>
+
+<!-- XP WINDOW -->
 <div id="xp-window">
   <div id="title-bar">
     Thunderbolt-web
@@ -90,6 +132,276 @@
     2026 ThunderboltT1003/UAJE.
   </div>
 </div>
+
+<script>
+  function signup() {
+    const user = document.getElementById("newUser").value;
+    const pass = document.getElementById("newPass").value;
+
+    if (!user || !pass) {
+      document.getElementById("auth-msg").innerText = "Please fill out all fields.";
+      return;
+    }
+
+    if (localStorage.getItem(user)) {
+      document.getElementById("auth-msg").innerText = "Username already exists.";
+      return;
+    }
+
+    localStorage.setItem(user, pass);
+    document.getElementById("auth-msg").innerText = "Account created! You can now log in.";
+  }
+
+  function login() {
+    const user = document.getElementById("user").value;
+    const pass = document.getElementById("pass").value;
+
+    const storedPass = localStorage.getItem(user);
+
+    if (storedPass === pass) {
+      document.getElementById("auth-msg").innerText = "Login successful!";
+      document.getElementById("xp-window").style.display = "block";
+      document.getElementById("auth-box").style.display = "none";
+    } else {
+      document.getElementById("auth-msg").innerText = "Incorrect username or password.";
+    }
+  }
+</script>
+{<div id="profile-box" style="display:none; width:90%; margin:20px auto; background:#ffffff; padding:20px; border:2px solid #1e4c8b;">
+  <h2>Your Profile</h2>
+
+  <label>Display Name:</label><br>
+  <input id="profileName" type="text" style="width:300px;"><br><br>
+
+  <label>Bio:</label><br>
+  <textarea id="profileBio" style="width:300px; height:80px;"></textarea><br><br>
+
+  <label>Favorite Color:</label><br>
+  <input id="profileColor" type="text" style="width:300px;"><br><br>
+
+  <button onclick="saveProfile()">Save Profile</button>
+  <p id="profile-msg"></p>
+</div>
+}
+{<div id="dashboard" style="display:none; width:90%; margin:20px auto; background:#ffffff; padding:20px; border:2px solid #1e4c8b;">
+  <h2 id="dash-welcome">Welcome!</h2>
+
+  <div style="margin-bottom:20px;">
+    <button onclick="openProfile()">Profile</button>
+    <button onclick="openSettings()">Settings</button>
+    <button onclick="logout()">Logout</button>
+  </div>
+
+  <h3>Your Stats</h3>
+  <div id="stats-box" style="background:#ece9d8; padding:10px; border:1px solid #b5b2a8;">
+    <p><b>Account:</b> <span id="stat-username"></span></p>
+    <p><b>Display Name:</b> <span id="stat-displayname"></span></p>
+    <p><b>Favorite Color:</b> <span id="stat-color"></span></p>
+  </div>
+
+  <h3>Your Friends</h3>
+<div id="friends-box" style="background:#ece9d8; padding:10px; border:1px solid #b5b2a8; margin-bottom:20px;">
+  <input id="friendName" type="text" placeholder="Add friend..." style="width:200px;">
+  <button onclick="addFriend()">Add</button>
+
+  <h3>Your Messages</h3>
+<div id="messages-box" style="background:#ece9d8; padding:10px; border:1px solid #b5b2a8; margin-bottom:20px;">
+  <input id="msgRecipient" type="text" placeholder="Send to friend..." style="width:200px;"><br><br>
+  <textarea id="msgText" placeholder="Write a message..." style="width:300px; height:80px;"></textarea><br><br>
+  <button onclick="sendMessage()">Send Message</button>
+
+  <h4>Inbox</h4>
+  <ul id="inbox-list" style="margin-top:10px;"></ul>
+</div>
+
+}
+<script>
+  let currentUser = null;
+
+  function loadProfile() {
+    const data = localStorage.getItem(currentUser + "_profile");
+
+    if (data) {
+      const profile = JSON.parse(data);
+      document.getElementById("profileName").value = profile.name || "";
+      document.getElementById("profileBio").value = profile.bio || "";
+      document.getElementById("profileColor").value = profile.color || "";
+    }
+
+    document.getElementById("profile-box").style.display = "block";
+  }
+
+  function saveProfile() {
+    const profile = {
+      name: document.getElementById("profileName").value,
+      bio: document.getElementById("profileBio").value,
+      color: document.getElementById("profileColor").value
+    };
+
+    localStorage.setItem(currentUser + "_profile", JSON.stringify(profile));
+    document.getElementById("profile-msg").innerText = "Profile saved!";
+  }
+
+  // Modify your login() function:
+  function login() {
+    const user = document.getElementById("user").value;
+    const pass = document.getElementById("pass").value;
+
+    const storedPass = localStorage.getItem(user);
+
+   if (storedPass === pass) {
+  currentUser = user;
+  document.getElementById("auth-msg").innerText = "Login successful!";
+  document.getElementById("xp-window").style.display = "block";
+  document.getElementById("auth-box").style.display = "none";
+
+  loadProfile();
+  openDashboard();
+}
+  function openDashboard() {
+  document.getElementById("dashboard").style.display = "block";
+
+  const profileData = JSON.parse(localStorage.getItem(currentUser + "_profile")) || {};
+
+  document.getElementById("dash-welcome").innerText = "Welcome, " + (profileData.name || currentUser) + "!";
+  document.getElementById("stat-username").innerText = currentUser;
+  document.getElementById("stat-displayname").innerText = profileData.name || "(none)";
+  document.getElementById("stat-color").innerText = profileData.color || "(none)";
+}
+
+function openProfile() {
+  document.getElementById("profile-box").scrollIntoView({ behavior: "smooth" });
+}
+
+function openSettings() {
+  alert("Settings panel coming soon!");
+}
+
+function logout() {
+  // Clear the current user session
+  currentUser = null;
+
+  // Hide all logged-in UI
+  document.getElementById("xp-window").style.display = "none";
+  document.getElementById("dashboard").style.display = "none";
+  document.getElementById("profile-box").style.display = "none";
+
+  // Clear inbox, friends, profile fields visually
+  document.getElementById("friends-list").innerHTML = "";
+  document.getElementById("inbox-list").innerHTML = "";
+  document.getElementById("profileName").value = "";
+  document.getElementById("profileBio").value = "";
+  document.getElementById("profileColor").value = "";
+
+  // Show login box again
+  document.getElementById("auth-box").style.display = "block";
+
+  // Optional: Clear login fields
+  document.getElementById("user").value = "";
+  document.getElementById("pass").value = "";
+}
+function loadFriends() {
+  const data = localStorage.getItem(currentUser + "_friends");
+  const friends = data ? JSON.parse(data) : [];
+
+  const list = document.getElementById("friends-list");
+  list.innerHTML = "";
+
+  friends.forEach((friend, index) => {
+    const li = document.createElement("li");
+    li.textContent = friend + " ";
+
+    const removeBtn = document.createElement("button");
+    removeBtn.textContent = "Remove";
+    removeBtn.onclick = () => removeFriend(index);
+
+    li.appendChild(removeBtn);
+    list.appendChild(li);
+  });
+}
+
+function addFriend() {
+  const name = document.getElementById("friendName").value.trim();
+  if (!name) return;
+
+  const data = localStorage.getItem(currentUser + "_friends");
+  const friends = data ? JSON.parse(data) : [];
+
+  friends.push(name);
+  localStorage.setItem(currentUser + "_friends", JSON.stringify(friends));
+
+  document.getElementById("friendName").value = "";
+  loadFriends();
+}
+
+function removeFriend(index) {
+  const data = localStorage.getItem(currentUser + "_friends");
+  const friends = data ? JSON.parse(data) : [];
+
+  friends.splice(index, 1);
+  localStorage.setItem(currentUser + "_friends", JSON.stringify(friends));
+
+  loadFriends();
+}
+  function loadInbox() {
+  const data = localStorage.getItem(currentUser + "_messages");
+  const messages = data ? JSON.parse(data) : [];
+
+  const list = document.getElementById("inbox-list");
+  list.innerHTML = "";
+
+  messages.forEach((msg, index) => {
+    const li = document.createElement("li");
+    li.innerHTML = `<b>From:</b> ${msg.from}<br>${msg.text}<br>`;
+
+    const removeBtn = document.createElement("button");
+    removeBtn.textContent = "Delete";
+    removeBtn.onclick = () => deleteMessage(index);
+
+    li.appendChild(removeBtn);
+    list.appendChild(li);
+  });
+}
+
+function sendMessage() {
+  const recipient = document.getElementById("msgRecipient").value.trim();
+  const text = document.getElementById("msgText").value.trim();
+
+  if (!recipient || !text) return;
+
+  const friendsData = localStorage.getItem(currentUser + "_friends");
+  const friends = friendsData ? JSON.parse(friendsData) : [];
+
+  if (!friends.includes(recipient)) {
+    alert("You can only message people in your friends list.");
+    return;
+  }
+
+  const inboxData = localStorage.getItem(recipient + "_messages");
+  const inbox = inboxData ? JSON.parse(inboxData) : [];
+
+  inbox.push({
+    from: currentUser,
+    text: text
+  });
+
+  localStorage.setItem(recipient + "_messages", JSON.stringify(inbox));
+
+  document.getElementById("msgRecipient").value = "";
+  document.getElementById("msgText").value = "";
+}
+
+function deleteMessage(index) {
+  const data = localStorage.getItem(currentUser + "_messages");
+  const messages = data ? JSON.parse(data) : [];
+
+  messages.splice(index, 1);
+  localStorage.setItem(currentUser + "_messages", JSON.stringify(messages));
+
+  loadInbox();
+}
+  }
+</script>
 
 </body>
 </html>
